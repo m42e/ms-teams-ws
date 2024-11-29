@@ -6,7 +6,6 @@ use crate::types::AppIdentifiers;
 use futures_util::SinkExt;
 use futures_util::StreamExt;
 use std::error::Error;
-use tokio::time::{timeout, Duration};
 use tokio_tungstenite::connect_async;
 use url::Url;
 
@@ -71,6 +70,21 @@ impl TeamsWebsocket {
         }
     }
 
+    /// Connects to the WebSocket server using the provided URL and parameters.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the URL cannot be parsed or if the connection attempt fails.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut websocket = TeamsWebsocket::new(identifier, token, url).await;
+    /// match websocket.connect().await {
+    ///     Ok(_) => println!("Connected successfully"),
+    ///     Err(e) => eprintln!("Failed to connect: {}", e),
+    /// }
+    /// ```
     pub async fn connect(&mut self) -> Result<(), Box<dyn Error>> {
         let url = Url::parse_with_params(
             &self.url,
@@ -108,7 +122,20 @@ impl TeamsWebsocket {
         self.socket = Some(socket);
         Ok(())
     }
-
+    
+    /// Sends a `ClientMessage` to Teams.
+    ///
+    /// # Arguments
+    ///
+    /// * `message` - The `ClientMessage` to be sent.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the WebSocket connection is not established, if the message cannot be serialized, or if there is an error sending the message.
+    ///
+    /// # Examples
+    ///
+    /// 
     pub async fn send(&mut self, message: ClientMessage) -> Result<(), Box<dyn Error>> {
         if let Some(socket) = &mut self.socket {
             let mut message = message;
@@ -140,33 +167,28 @@ impl TeamsWebsocket {
 
     pub async fn receive(&mut self) -> Result<ServerMessage, Box<dyn Error>> {
         if let Some(socket) = &mut self.socket {
-            match timeout(Duration::from_millis(10), socket.next()).await {
-                Err(e) => {
+            match socket.next().await {
+                Some(Ok(msg)) => {
+                    let server_message =
+                        serde_json::from_str::<ServerMessage>(msg.to_text().unwrap());
+                    match server_message {
+                        Ok(json) => {
+                            Ok(json)
+                        }
+                        Err(e) => {
+                            log::warn!("Error parsing json : {}", e);
+                            Err(Box::new(e))
+                        }
+                    }
+                },
+                Some(Err(e)) => {
+                    log::warn!("Error reading from socket {}", e);
                     Err(Box::new(e))
                 }
-                Ok(None) => {
+                None => {
                     log::info!("Socket closed");
                     Err(Box::from("socket closed"))
                 }
-                Ok(Some(msg)) => match msg {
-                    Ok(msg) => {
-                        let server_message =
-                            serde_json::from_str::<ServerMessage>(msg.to_text().unwrap());
-                        match server_message {
-                            Ok(json) => {
-                                Ok(json)
-                            }
-                            Err(e) => {
-                                log::warn!("Error parsing json : {}", e);
-                                Err(Box::new(e))
-                            }
-                        }
-                    }
-                    Err(e) => {
-                        log::warn!("Error reading from socket {}", e);
-                        Err(Box::new(e))
-                    }
-                },
             }
         } else {
             log::warn!("{}", SOCKET_NOT_CONNECTED);

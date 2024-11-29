@@ -199,19 +199,19 @@ impl ClientMessageParameter {
 #[derive(Debug)]
 pub enum ClientMessageParameterType {
     #[serde(rename = "applause")]
-    ReactApplause = 0b0000_0111_0001_0000,
+    ReactApplause,
     #[serde(rename = "laugh")]
-    ReactLaugh = 0b0000_0111_0001_0001,
+    ReactLaugh,
     #[serde(rename = "like")]
-    ReactLike = 0b0000_0111_0001_0010,
+    ReactLike,
     #[serde(rename = "love")]
-    ReactLove = 0b0000_0111_0001_0011,
+    ReactLove,
     #[serde(rename = "wow")]
-    ReactWow = 0b0000_0111_0001_0100,
+    ReactWow,
     #[serde(rename = "chat")]
-    ToggleUiChat = 0b0000_1001_0000_0001,
+    ToggleUiChat,
     #[serde(rename = "sharing-tray")]
-    ToggleUiSharing = 0b0000_1001_0000_0010,
+    ToggleUiSharing,
 }
 
 /// Represents a message sent from the client.
@@ -259,39 +259,39 @@ impl std::fmt::Display for ClientMessage {
 #[derive(Debug)]
 #[serde(rename = "none")]
 pub enum MeetingAction {
-    None = 0,
+    None,
     #[serde(rename = "query-state")]
-    QueryMeetingState = 0b0000_0001_0000_0000,
+    QueryMeetingState,
     #[serde(rename = "mute")]
-    Mute = 0b0000_0010_0000_0000,
+    Mute,
     #[serde(rename = "unmute")]
-    Unmute = 0b0000_0010_0000_0001,
+    Unmute,
     #[serde(rename = "toggle-mute")]
-    ToggleMute = 0b0000_0010_0000_0010,
+    ToggleMute,
     #[serde(rename = "hide-video")]
-    HideVideo = 0b0000_0011_0000_0000,
+    HideVideo,
     #[serde(rename = "show-video")]
-    ShowVideo = 0b0000_0011_0000_0001,
+    ShowVideo,
     #[serde(rename = "toggle-video")]
-    ToggleVideo = 0b0000_0011_0000_0010,
+    ToggleVideo,
     #[serde(rename = "unblur-background")]
-    UnblurBackground = 0b0000_0100_0000_0000,
+    UnblurBackground,
     #[serde(rename = "blur-background")]
-    BlurBackground = 0b0000_0100_0000_0001,
+    BlurBackground,
     #[serde(rename = "toggle-background-blur")]
-    ToggleBlurBackground = 0b0000_0100_0000_0010,
+    ToggleBlurBackground,
     #[serde(rename = "lower-hand")]
-    LowerHand = 0b0000_0101_0000_0000,
+    LowerHand,
     #[serde(rename = "raise-hand")]
-    RaiseHand = 0b0000_0101_0000_0001,
+    RaiseHand,
     #[serde(rename = "toggle-hand")]
-    ToggleHand = 0b0000_0101_0000_0010,
+    ToggleHand,
     #[serde(rename = "leave-call")]
-    LeaveCall = 0b0000_0111_0000_0000,
+    LeaveCall,
     #[serde(rename = "send-reaction")]
-    React = 0b0000_1000_0000_0000,
+    React,
     #[serde(rename = "toggle-ui")]
-    ToggleUI = 0b0000_1001_0000_0000,
+    ToggleUI,
     #[serde(rename = "stop-sharing")]
-    StopSharing = 0b0000_1010_0000_0000,
+    StopSharing,
 }
