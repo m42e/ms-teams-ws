@@ -50,6 +50,19 @@ local publish_gitea() = {
   ],
 };
 
+
+local publish_crates() = {
+  name: 'publish-gitea',
+  image: 'rust:1.82',
+  environment: {
+    CRATES_TOKEN: { from_secret: 'crates.io-token' },
+  },
+  commands: [
+    'export CARGO_REGISTRY_TOKEN="Bearer $${CRATES_TOKEN}"',
+    'cargo publish',
+  ],
+};
+
 local release_pipeline = {
   kind: 'pipeline',
   type: 'docker',

@@ -1,11 +1,11 @@
 [package]
-name = "software-library-teams-ws"
-version = "0.2.1"
+name = "ms-teams-ws"
+version = "0.2.2"
 edition = "2021"
 authors = ["Matthias Bilger <matthias@bilger.info>"]
 license = "MIT"
 description = "A library to communicate to the local teams websocket for mute/unmute and more functions during meetings"
-homepage = "https://m42e.de/mutenix"
+homepage = "https://m42e.de/"
 
 [registries.gitea]
 index = "sparse+https://gitea.pb42.de/api/packages/mutenix/cargo/"

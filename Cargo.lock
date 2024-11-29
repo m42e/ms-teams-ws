@@ -411,6 +411,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "ms-teams-ws"
+version = "0.2.2"
+dependencies = [
+ "futures-util",
+ "log",
+ "rand",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-tungstenite",
+ "tungstenite",
+ "url",
+]
+
+[[package]]
 name = "object"
 version = "0.36.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -572,21 +587,6 @@ checksum = "c970269d99b64e60ec3bd6ad27270092a5394c4e309314b18ae3fe575695fbe8"
 dependencies = [
  "libc",
  "windows-sys",
-]
-
-[[package]]
-name = "software-library-teams-ws"
-version = "0.2.0"
-dependencies = [
- "futures-util",
- "log",
- "rand",
- "serde",
- "serde_json",
- "tokio",
- "tokio-tungstenite",
- "tungstenite",
- "url",
 ]
 
 [[package]]
