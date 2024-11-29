@@ -56,6 +56,8 @@ pub struct TeamsWebsocket {
     url: String,
 }
 
+const SOCKET_NOT_CONNECTED: &str = "socket not connected";
+
 impl TeamsWebsocket {
     pub async fn new(
         identifier: AppIdentifiers,
@@ -114,21 +116,28 @@ impl TeamsWebsocket {
             let mut message = message;
             message.request_id = Some(self.request_id);
             self.request_id += 1;
-            let message = serde_json::to_string(&message);
-            log::debug!("Sending message: {:?}", message);
-            if let Err(e) = socket
-                .send(tungstenite::Message::Text(message.unwrap()))
-                .await
-            {
-                log::warn!("Error sending message: {}", e);
-                return Err(Box::new(e));
-            } else {
-                Ok(())
-            }
-        } else {
-            log::warn!("Socket not connected");
-            return Err(Box::from("socket not connected"));
+            let serialized_message = serde_json::to_string(&message);
+            log::debug!("Sending message: {:?}", serialized_message);
+            match serialized_message {
+                Ok(msg) => {
+                    if let Err(e) = socket
+                    .send(tungstenite::Message::Text(msg))
+                    .await
+                    {
+                        log::warn!("Error sending message: {}", e);
+                        return Err(Box::new(e));
+                    }
+                }
+                Err(e) => {
+                    log::warn!("Error serializing message: {}", e);
+                    return Err(Box::new(e));
+                }
+            } 
+            return Ok(());
         }
+        log::warn!("{}", SOCKET_NOT_CONNECTED);
+        Err(Box::from(SOCKET_NOT_CONNECTED))
+        
     }
 
     pub async fn receive(&mut self) -> Result<ServerMessage, Box<dyn Error>> {
@@ -162,8 +171,8 @@ impl TeamsWebsocket {
                 },
             }
         } else {
-            log::warn!("Socket not connected");
-            return Err(Box::from("socket not connected"));
+            log::warn!("{}", SOCKET_NOT_CONNECTED);
+            return Err(Box::from(SOCKET_NOT_CONNECTED));
         }
     }
 
@@ -176,8 +185,8 @@ impl TeamsWebsocket {
             log::info!("Connection closed");
             Ok(())
         } else {
-            log::warn!("Socket not connected");
-            return Err(Box::from("socket not connected"));
+            log::warn!("{}", SOCKET_NOT_CONNECTED);
+            return Err(Box::from(SOCKET_NOT_CONNECTED));
         }
     }
 }

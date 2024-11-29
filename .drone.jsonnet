@@ -36,16 +36,18 @@ local publish_gitea(version) = {
   name: 'publish-gitea',
   image: 'rust:1.82',
   environment: {
-    gitea_token: { from_secret: 'gitea-token' },
-  }
+    GITEA_TOKEN: { from_secret: 'gitea-token' },
+  },
   settings: {
     user: { from_secret: 'gitea-username' },
     token: { from_secret: 'gitea-token' },
-    file: binaries,
     version: version,
-  },  
+  },
   commands: [
-    'CARGO_REGISTY_gitea_TOKEN="Bearer ${gitea_token}" CARGO_REGISTY_DEFAULT=gitea cargo publish',
+    'export CARGO_REGISTRIES_GITEA_INDEX="sparse+https://gitea.pb42.de/api/packages/mutenix/cargo/"',
+    'export CARGO_REGISTRIES_GITEA_TOKEN="Bearer $${GITEA_TOKEN}"',
+    'export CARGO_REGISTRY_DEFAULT=gitea',
+    'cargo publish',
   ],
   depends_on: ['build-mac', 'build-windows'],
 };
@@ -71,7 +73,7 @@ local main_pipeline = {
   type: 'docker',
   name: 'main-pipeline',
   steps:
-    build_it()
+    build_it(),
   trigger: {
     event: { include: ['push'] },
     branch: { include: ['main'] },
@@ -84,7 +86,7 @@ local pr_pipeline = {
   type: 'docker',
   name: 'pr-pipeline',
   steps:
-    build_it()
+    build_it(),
   trigger: {
     event: { include: ['pull_request'] },
     branch: { include: ['main'] },
