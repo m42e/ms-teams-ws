@@ -103,6 +103,21 @@ local main_pipeline = {
   image_pull_secrets: ['dockerconfigjson'],
 };
 
+local main_pipeline = {
+  kind: 'pipeline',
+  type: 'docker',
+  name: 'main-pipeline',
+  steps:
+    [
+      publish_crates(),
+    ],
+  trigger: {
+    target: ['production'],
+    branch: { include: ['main'] },
+  },
+  image_pull_secrets: ['dockerconfigjson'],
+};
+
 local pr_pipeline = {
   kind: 'pipeline',
   type: 'docker',
