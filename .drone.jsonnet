@@ -103,10 +103,10 @@ local main_pipeline = {
   image_pull_secrets: ['dockerconfigjson'],
 };
 
-local main_pipeline = {
+local main_release = {
   kind: 'pipeline',
   type: 'docker',
-  name: 'main-pipeline',
+  name: 'main-release-pipeline',
   steps:
     [
       publish_crates(),
@@ -134,4 +134,5 @@ local pr_pipeline = {
 [
   pr_pipeline,
   main_pipeline,
+  main_release,
 ]
