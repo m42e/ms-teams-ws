@@ -12,6 +12,14 @@ local build_windows() = {
   ],
 };
 
+local build_linux() = {
+  name: 'build-linux',
+  image: 'rust:1.82',
+  commands: [
+    'cargo build --release',
+  ],
+};
+
 local build_mac() = {
   name: 'build-mac',
   image: 'gitea.pb42.de/mutenix/build-docker:macos-v1.0.0',
@@ -28,6 +36,7 @@ local build_mac() = {
 };
 
 local build_it() = [
+  build_linux(),
   build_windows(),
   build_mac(),
 ];
