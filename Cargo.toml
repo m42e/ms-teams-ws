@@ -3,6 +3,10 @@ name = "software-library-teams-ws"
 version = "0.1.0"
 edition = "2021"
 
+[registries.gitea]
+index = "sparse+https://gitea.pb42.de/api/packages/mutenix/cargo/"
+
+
 [dependencies]
 futures-util = "0.3.31"
 log = "0.4.22"

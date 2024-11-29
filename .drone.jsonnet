@@ -32,20 +32,21 @@ local build_it() = [
   build_mac(),
 ];
 
-local binaries = [
-  'artifacts/rmute-teams-mac',
-  'artifacts/rmute-teams-windows.exe',
-];
-
-local package(version) = {
-  name: 'prerelease',
-  image: 'gitea.pb42.de/matthias/drone-gitea-package',
+local publish_gitea(version) = {
+  name: 'publish-gitea',
+  image: 'rust:1.82',
+  environment: {
+    gitea_token: { from_secret: 'gitea-token' },
+  }
   settings: {
     user: { from_secret: 'gitea-username' },
     token: { from_secret: 'gitea-token' },
     file: binaries,
     version: version,
-  },
+  },  
+  commands: [
+    'CARGO_REGISTY_gitea_TOKEN="Bearer ${gitea_token}" CARGO_REGISTY_DEFAULT=gitea cargo publish',
+  ],
   depends_on: ['build-mac', 'build-windows'],
 };
 
@@ -56,7 +57,7 @@ local release_pipeline = {
   steps:
     build_it() +
     [
-      package('${DRONE_TAG}'),
+      publish_gitea('${DRONE_TAG}'),
     ],
   trigger: {
     event: { include: ['tag'] },
@@ -70,10 +71,7 @@ local main_pipeline = {
   type: 'docker',
   name: 'main-pipeline',
   steps:
-    build_it() +
-    [
-      package('main'),
-    ],
+    build_it()
   trigger: {
     event: { include: ['push'] },
     branch: { include: ['main'] },
@@ -86,10 +84,7 @@ local pr_pipeline = {
   type: 'docker',
   name: 'pr-pipeline',
   steps:
-    build_it() +
-    [
-      package('pr-${DRONE_PULL_REQUEST}'),
-    ],
+    build_it()
   trigger: {
     event: { include: ['pull_request'] },
     branch: { include: ['main'] },

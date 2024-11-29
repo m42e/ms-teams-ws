@@ -1,27 +1,67 @@
 mod messages;
 mod types;
 
-use std::error::Error;
+use crate::messages::{ClientMessage, ServerMessage};
+use crate::types::AppIdentifiers;
 use futures_util::SinkExt;
 use futures_util::StreamExt;
+use log;
 use serde_json;
+use std::error::Error;
 use tokio::time::{timeout, Duration};
 use tokio_tungstenite::connect_async;
 use url::Url;
-use crate::messages::{ClientMessage, ServerMessage};
-use crate::types::AppIdentifiers;
-use log;
 
+/// A struct representing a WebSocket connection to a Microsoft Teams server.
+///
+/// # Fields
+/// - `identifier`: An `AppIdentifiers` struct containing information about the app.
+/// - `socket`: An optional WebSocket stream.
+/// - `token`: An optional authentication token.
+/// - `request_id`: A counter for request IDs.
+/// - `url`: The URL of the WebSocket server.
+///
+/// # Methods
+/// - `new`: Creates a new `TeamsWebsocket` instance.
+/// - `connect`: Connects to the WebSocket server.
+/// - `send`: Sends a `ClientMessage` to the server.
+/// - `receive`: Receives a `ServerMessage` from the server.
+/// - `close`: Closes the WebSocket connection.
+///
+/// # Example
+/// ```rust
+/// let identifier = AppIdentifiers {
+///     protocol_version: "1.0",
+///     manufacturer: "TestManufacturer",
+///     device: "TestDevice",
+///     app: "TestApp",
+///     app_version: "1.0",
+/// };
+/// let mut websocket = TeamsWebsocket::new(identifier, None, None).await;
+/// websocket.connect().await.unwrap();
+/// let client_message = ClientMessage::new(messages::MeetingAction::BlurBackground, None);
+/// websocket.send(client_message).await.unwrap();
+/// let server_message = websocket.receive().await.unwrap();
+/// websocket.close().await.unwrap();
+/// ```
 pub struct TeamsWebsocket {
     identifier: AppIdentifiers,
-    socket: Option<tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>>,
+    socket: Option<
+        tokio_tungstenite::WebSocketStream<
+            tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>,
+        >,
+    >,
     token: Option<String>,
     request_id: i32,
     url: String,
 }
 
 impl TeamsWebsocket {
-    pub async fn new(identifier: AppIdentifiers, token: Option<String>, url: Option<String>) -> Self {
+    pub async fn new(
+        identifier: AppIdentifiers,
+        token: Option<String>,
+        url: Option<String>,
+    ) -> Self {
         Self {
             identifier,
             socket: None,
@@ -30,7 +70,7 @@ impl TeamsWebsocket {
             url: url.unwrap_or_else(|| "ws://127.0.0.1:8124".to_string()),
         }
     }
-    
+
     pub async fn connect(&mut self) -> Result<(), Box<dyn Error>> {
         let url = Url::parse_with_params(
             &self.url,
@@ -68,7 +108,7 @@ impl TeamsWebsocket {
         self.socket = Some(socket);
         Ok(())
     }
-    
+
     pub async fn send(&mut self, message: ClientMessage) -> Result<(), Box<dyn Error>> {
         if let Some(socket) = &mut self.socket {
             let mut message = message;
@@ -90,7 +130,7 @@ impl TeamsWebsocket {
             return Err(Box::from("socket not connected"));
         }
     }
-    
+
     pub async fn receive(&mut self) -> Result<ServerMessage, Box<dyn Error>> {
         if let Some(socket) = &mut self.socket {
             match timeout(Duration::from_millis(10), socket.next()).await {
@@ -125,7 +165,7 @@ impl TeamsWebsocket {
             log::warn!("Socket not connected");
             return Err(Box::from("socket not connected"));
         }
-    } 
+    }
 
     pub async fn close(&mut self) -> Result<(), Box<dyn Error>> {
         if let Some(socket) = &mut self.socket {
@@ -135,23 +175,22 @@ impl TeamsWebsocket {
             }
             log::info!("Connection closed");
             Ok(())
-        }else {
+        } else {
             log::warn!("Socket not connected");
             return Err(Box::from("socket not connected"));
         }
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tokio::runtime::Runtime;
-    use tokio_tungstenite::tungstenite::protocol::Message;
-    use tokio_tungstenite::accept_async;
-    use tokio::net::TcpListener;
+    use rand::Rng;
     use std::net::SocketAddr;
-use rand::Rng;
+    use tokio::net::TcpListener;
+    use tokio::runtime::Runtime;
+    use tokio_tungstenite::accept_async;
+    use tokio_tungstenite::tungstenite::protocol::Message;
 
     #[test]
     fn test_teams_websocket_new() {
@@ -174,7 +213,9 @@ use rand::Rng;
     async fn start_test_server() -> SocketAddr {
         let mut rng = rand::thread_rng();
         let port: u16 = rng.gen_range(1024..65535);
-        let listener = TcpListener::bind(format!("127.0.0.1:{}", port)).await.unwrap();
+        let listener = TcpListener::bind(format!("127.0.0.1:{}", port))
+            .await
+            .unwrap();
         let addr = listener.local_addr().unwrap();
         tokio::spawn(async move {
             while let Ok((stream, _)) = listener.accept().await {
@@ -183,7 +224,8 @@ use rand::Rng;
                 tokio::spawn(async move {
                     while let Some(Ok(msg)) = read.next().await {
                         if let Message::Text(text) = msg {
-                            let client_message: ClientMessage = serde_json::from_str(&text).unwrap();
+                            let client_message: ClientMessage =
+                                serde_json::from_str(&text).unwrap();
                             let server_message = ServerMessage {
                                 request_id: client_message.request_id,
                                 response: Some(format!("Echo: {}", text)),
@@ -241,7 +283,13 @@ use rand::Rng;
             websocket.send(client_message).await.unwrap();
 
             let server_message = websocket.receive().await.unwrap();
-            assert_eq!(server_message.response, Some("Echo: {\"action\":\"blur-background\",\"parameters\":null,\"requestId\":0}".to_string()));
+            assert_eq!(
+                server_message.response,
+                Some(
+                    "Echo: {\"action\":\"blur-background\",\"parameters\":null,\"requestId\":0}"
+                        .to_string()
+                )
+            );
         });
     }
 }

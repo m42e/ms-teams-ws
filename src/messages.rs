@@ -1,6 +1,14 @@
-
 use serde::{Deserialize, Serialize};
 
+/// Represents a message sent from the server.
+///
+/// # Fields
+///
+/// * `request_id` - An optional identifier for the request.
+/// * `response` - An optional response message from the server.
+/// * `error_msg` - An optional error message from the server.
+/// * `token_refresh` - An optional token refresh message.
+/// * `meeting_update` - An optional update about the meeting.
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[derive(Debug)]
@@ -22,6 +30,12 @@ impl std::fmt::Display for ServerMessage {
     }
 }
 
+/// Represents an update about the meeting.
+///
+/// # Fields
+///
+/// * `meeting_permissions` - Optional permissions for the meeting.
+/// * `meeting_state` - Optional state of the meeting.
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[derive(Debug)]
@@ -40,6 +54,20 @@ impl std::fmt::Display for MeetingUpdate {
     }
 }
 
+/// Represents the permissions for a meeting.
+///
+/// # Fields
+///
+/// * `can_toggle_mute` - Whether the user can toggle mute.
+/// * `can_toggle_video` - Whether the user can toggle video.
+/// * `can_toggle_hand` - Whether the user can toggle hand raise.
+/// * `can_toggle_blur` - Whether the user can toggle background blur.
+/// * `can_leave` - Whether the user can leave the meeting.
+/// * `can_react` - Whether the user can react.
+/// * `can_toggle_share_tray` - Whether the user can toggle the share tray.
+/// * `can_toggle_chat` - Whether the user can toggle chat.
+/// * `can_stop_sharing` - Whether the user can stop sharing.
+/// * `can_pair` - Whether the user can pair devices.
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[derive(Debug)]
@@ -89,6 +117,18 @@ impl std::fmt::Display for MeetingPermissions {
     }
 }
 
+/// Represents the state of a meeting.
+///
+/// # Fields
+///
+/// * `is_muted` - Whether the user is muted.
+/// * `is_hand_raised` - Whether the user's hand is raised.
+/// * `is_in_meeting` - Whether the user is in a meeting.
+/// * `is_recording_on` - Whether recording is on.
+/// * `is_background_blurred` - Whether the background is blurred.
+/// * `is_sharing` - Whether the user is sharing their screen.
+/// * `has_unread_messages` - Whether there are unread messages.
+/// * `is_video_on` - Whether the video is on.
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[derive(Debug)]
@@ -134,6 +174,11 @@ impl std::fmt::Display for MeetingState {
     }
 }
 
+/// Represents a parameter for a client message.
+///
+/// # Fields
+///
+/// * `type_` - The type of the client message parameter.
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[derive(Debug)]
@@ -148,6 +193,7 @@ impl ClientMessageParameter {
     }
 }
 
+/// Represents the type of a client message parameter.
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[derive(Debug)]
@@ -168,7 +214,13 @@ pub enum ClientMessageParameterType {
     ToggleUiSharing = 0b0000_1001_0000_0010,
 }
 
-
+/// Represents a message sent from the client.
+///
+/// # Fields
+///
+/// * `action` - The action to be performed.
+/// * `parameters` - Optional parameters for the action.
+/// * `request_id` - An optional identifier for the request.
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[derive(Debug)]
@@ -181,7 +233,11 @@ pub struct ClientMessage {
 
 impl ClientMessage {
     pub fn new(action: MeetingAction, parameters: Option<ClientMessageParameter>) -> Self {
-        Self { action, parameters, request_id: None }
+        Self {
+            action,
+            parameters,
+            request_id: None,
+        }
     }
 }
 
@@ -190,12 +246,14 @@ impl std::fmt::Display for ClientMessage {
         write!(
             f,
             "ClientMessage {{ action: {:?}, parameters: {:?}, request_id: {} }}",
-            self.action, self.parameters, self.request_id.or(Some(0)).unwrap()
+            self.action,
+            self.parameters,
+            self.request_id.or(Some(0)).unwrap()
         )
     }
-    
 }
 
+/// Represents an action that can be performed in a meeting.
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[derive(Debug)]
