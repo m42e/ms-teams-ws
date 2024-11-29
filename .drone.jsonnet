@@ -61,13 +61,12 @@ local publish_gitea() = {
 
 
 local publish_crates() = {
-  name: 'publish-gitea',
+  name: 'publish-crates',
   image: 'rust:1.82',
   environment: {
-    CRATES_TOKEN: { from_secret: 'crates.io-token' },
+    CARGO_REGISTRY_TOKEN: { from_secret: 'crates.io-token' },
   },
   commands: [
-    'export CARGO_REGISTRY_TOKEN="Bearer $${CRATES_TOKEN}"',
     'cargo publish',
   ],
 };
