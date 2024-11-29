@@ -248,7 +248,7 @@ impl std::fmt::Display for ClientMessage {
             "ClientMessage {{ action: {:?}, parameters: {:?}, request_id: {} }}",
             self.action,
             self.parameters,
-            self.request_id.or(Some(0)).unwrap()
+            self.request_id.unwrap_or(0)
         )
     }
 }

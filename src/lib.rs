@@ -5,8 +5,6 @@ use crate::messages::{ClientMessage, ServerMessage};
 use crate::types::AppIdentifiers;
 use futures_util::SinkExt;
 use futures_util::StreamExt;
-use log;
-use serde_json;
 use std::error::Error;
 use tokio::time::{timeout, Duration};
 use tokio_tungstenite::connect_async;
@@ -144,35 +142,35 @@ impl TeamsWebsocket {
         if let Some(socket) = &mut self.socket {
             match timeout(Duration::from_millis(10), socket.next()).await {
                 Err(e) => {
-                    return Err(Box::new(e));
+                    Err(Box::new(e))
                 }
                 Ok(None) => {
                     log::info!("Socket closed");
-                    return Err(Box::from("socket closed"));
+                    Err(Box::from("socket closed"))
                 }
                 Ok(Some(msg)) => match msg {
                     Ok(msg) => {
                         let server_message =
-                            serde_json::from_str::<ServerMessage>(&msg.to_text().unwrap());
+                            serde_json::from_str::<ServerMessage>(msg.to_text().unwrap());
                         match server_message {
                             Ok(json) => {
-                                return Ok(json);
+                                Ok(json)
                             }
                             Err(e) => {
                                 log::warn!("Error parsing json : {}", e);
-                                return Err(Box::new(e));
+                                Err(Box::new(e))
                             }
                         }
                     }
                     Err(e) => {
                         log::warn!("Error reading from socket {}", e);
-                        return Err(Box::new(e));
+                        Err(Box::new(e))
                     }
                 },
             }
         } else {
             log::warn!("{}", SOCKET_NOT_CONNECTED);
-            return Err(Box::from(SOCKET_NOT_CONNECTED));
+            Err(Box::from(SOCKET_NOT_CONNECTED))
         }
     }
 
@@ -186,7 +184,7 @@ impl TeamsWebsocket {
             Ok(())
         } else {
             log::warn!("{}", SOCKET_NOT_CONNECTED);
-            return Err(Box::from(SOCKET_NOT_CONNECTED));
+            Err(Box::from(SOCKET_NOT_CONNECTED))
         }
     }
 }
