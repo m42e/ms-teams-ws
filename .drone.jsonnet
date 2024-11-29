@@ -32,7 +32,7 @@ local build_it() = [
   build_mac(),
 ];
 
-local publish_gitea(version) = {
+local publish_gitea() = {
   name: 'publish-gitea',
   image: 'rust:1.82',
   environment: {
@@ -41,7 +41,6 @@ local publish_gitea(version) = {
   settings: {
     user: { from_secret: 'gitea-username' },
     token: { from_secret: 'gitea-token' },
-    version: version,
   },
   commands: [
     'export CARGO_REGISTRIES_GITEA_INDEX="sparse+https://gitea.pb42.de/api/packages/mutenix/cargo/"',
@@ -49,7 +48,6 @@ local publish_gitea(version) = {
     'export CARGO_REGISTRY_DEFAULT=gitea',
     'cargo publish',
   ],
-  depends_on: ['build-mac', 'build-windows'],
 };
 
 local release_pipeline = {
@@ -59,7 +57,7 @@ local release_pipeline = {
   steps:
     build_it() +
     [
-      publish_gitea('${DRONE_TAG}'),
+      publish_gitea(),
     ],
   trigger: {
     event: { include: ['tag'] },
@@ -73,7 +71,9 @@ local main_pipeline = {
   type: 'docker',
   name: 'main-pipeline',
   steps:
-    build_it(),
+    [
+      publish_gitea(),
+    ],
   trigger: {
     event: { include: ['push'] },
     branch: { include: ['main'] },
@@ -97,5 +97,4 @@ local pr_pipeline = {
 [
   pr_pipeline,
   main_pipeline,
-  release_pipeline,
 ]
