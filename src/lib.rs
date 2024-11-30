@@ -49,7 +49,7 @@ pub struct TeamsWebsocket {
         >,
     >,
     token: Option<String>,
-    request_id: i32,
+    request_id: u32,
     url: String,
 }
 

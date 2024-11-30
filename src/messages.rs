@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase")]
 #[derive(Debug)]
 pub struct ServerMessage {
-    pub request_id: Option<i32>,
+    pub request_id: Option<u32>,
     pub response: Option<String>,
     pub error_msg: Option<String>,
     pub token_refresh: Option<String>,
@@ -228,7 +228,7 @@ pub enum ClientMessageParameterType {
 pub struct ClientMessage {
     pub action: MeetingAction,
     pub parameters: Option<ClientMessageParameter>,
-    pub request_id: Option<i32>,
+    pub request_id: Option<u32>,
 }
 
 impl ClientMessage {
