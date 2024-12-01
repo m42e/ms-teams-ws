@@ -34,6 +34,9 @@ use url::Url;
 ///     app: "TestApp",
 ///     app_version: "1.0",
 /// };
+/// use ms_teams_ws::messages;
+/// use ms_teams_ws::TeamsWebsocket;
+///
 /// let mut websocket = TeamsWebsocket::new(identifier, None, None).await;
 /// websocket.connect().await.unwrap();
 /// let client_message = ClientMessage::new(messages::MeetingAction::BlurBackground, None);
@@ -79,6 +82,8 @@ impl TeamsWebsocket {
     /// # Examples
     ///
     /// ```
+    /// use ms_teams_ws::messages;
+    /// use ms_teams_ws::TeamsWebsocket;
     /// let mut websocket = TeamsWebsocket::new(identifier, token, url).await;
     /// match websocket.connect().await {
     ///     Ok(_) => println!("Connected successfully"),
