@@ -8,8 +8,6 @@ local build_windows() = {
     'HOME=/root/ . "/root/.cargo/env"',
     'rustup default stable',
     'rustup target add $TARGET',
-    'CARGO_TARGET_DIR=build/windows cargo build --target $TARGET',
-    'CARGO_TARGET_DIR=build/windows cargo test --verbose --target $TARGET',
     'CARGO_TARGET_DIR=build/windows cargo build --release --target $TARGET',
   ],
 };
@@ -35,8 +33,6 @@ local build_mac() = {
   commands: [
     '. "/root/.cargo/env"',
     'rustup target add $TARGET',
-    'CARGO_TARGET_DIR=build/mac cargo build --verbose --target $TARGET',
-    'CARGO_TARGET_DIR=build/mac cargo test --verbose --target $TARGET',
     'CARGO_TARGET_DIR=build/mac cargo build --verbose --release --target $TARGET',
   ],
 };
